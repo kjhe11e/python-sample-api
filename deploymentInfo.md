@@ -1,9 +1,9 @@
 ### Deploying our app to the public
 There are many ways we can deploy an app and have it serve public traffic.
-One such option is using Google App Engine. Google App Engine even helps us with SSL configuration so we can serve over HTTPS.
+One such option is using Google App Engine. Google App Engine even helps configure SSL enabling us to use HTTPS.
 Below I will outline the steps I took to deploy this app using Google App Engine.
 
-Prerequisites:
+**Prerequisites:**
 
 * A Google Cloud Platform account
 
@@ -11,13 +11,13 @@ Prerequisites:
 
 * Access to the source code in this repository
 
-Expected outcomes:
+**Expected outcomes:**
 
 * Our app is accessible via the public internet
 
 * Attempting to access the app via HTTP either fails or redirects to HTTPS
 
-Out of scope (for now):
+**Out of scope (for now):**
 
 * Repeatable infrastructure
 
@@ -28,7 +28,7 @@ Out of scope (for now):
 * Proxy setup (GCE Ingress, NGINX, Caddy, etc.)
 
 ### What is Google App Engine?
-Google App Engine (GAE) deploys apps according to an `app.yaml`
+Google App Engine helps facilitate app hosting/deployment by using an `app.yaml`
 configuration file. This file describes the expected environment for the service, such as:
 
 - the runtime, e.g. _Python v3.8_
@@ -37,11 +37,11 @@ configuration file. This file describes the expected environment for the service
 - environment variables
 - route handlers
 - the entrypoint/command used to run the app
-- ... and other resource settings (refer to documenation)
+- ... and other resource settings (refer to the docs)
 
 Please see the `app.yaml` config file in this repo for reference.
 
-### Deploying the app
+### How to deploy the app
 
 Assuming we have this repo and the GCP SDK/CLI configured for this project, we can deploy by simply running `gcloud app deploy` from this repository's base directory (and confirm the deployment by entering `Y` when prompted).
 
@@ -49,9 +49,9 @@ If successful, the CLI will output the app's publicly accessible URL. You may al
 
 ### Forcing HTTPS / disallowing HTTP
 
-We've configured our app to auto-upgrade HTTP requests to use HTTPS.
+We've configured our service to auto-upgrade HTTP requests to use HTTPS.
 
-This is achieved by the following handler specification:
+This is achieved by the following handler specification in `app.yaml`:
 ```
 handlers:
 - url: /.*
@@ -71,7 +71,7 @@ Requests for a URL that match this handler that do not use HTTPS are automatical
 
 ### Other Deployment Considerations
 
-* Since this app is not expected to serve heavy traffic, I chose the smallest server instance type available for Google App Engine - `F1`.
+* Since I do not intend for this app to serve heavy traffic, I chose the smallest server instance type available for Google App Engine, `F1`.
 
 ### Additional considerations for a Production service
 
@@ -79,7 +79,7 @@ Requests for a URL that match this handler that do not use HTTPS are automatical
 
 * Access control: configure who can access the service in GCP. Follow the _principle of least privilege_. Role-Based Access Control (RBAC) may be a suitable approach.
 
-* Use a database suitable for your application's needs. For example, you may want a Cloud SQL instance (or cluster) running Postgres.
+* Use a database suitable for the service's needs. For example, you may want a Cloud SQL instance (or cluster) running Postgres. If scaling is an issue, consider concepts like sharding, using a main-follower strategy (in lieu of the outdated master-slave terminology) where reads can come from one of the followers, etc.
 
 * Observability: increase understanding of the service's performance and behavior by building logging, metrics, monitoring, alerting, etc. This can help identify "problems" before they become bigger problems as well as debug issues that occurred.
 
@@ -93,7 +93,10 @@ Requests for a URL that match this handler that do not use HTTPS are automatical
 
 * Perform a sensible amount of User Acceptance Testing (UAT) to have at least some degree of confidence the service behaves as expected.
 
-### Resources / Documentation
+* For scaling, possibly use a caching system (e.g. Redis or Memcache) to speed up read requests.
+
+
+### Resources
 
 https://cloud.google.com/appengine/docs/standard/python3/configuration-files
 
